@@ -31,7 +31,6 @@ def solve_n_queens_util(board, row, n):
 
             # Llamada recursiva para la siguiente fila
             if solve_n_queens_util(board, row + 1, n):
-                print(f"Reina colocada en: {row},{col}")
                 return True
 
             # Retroceder
@@ -110,22 +109,6 @@ def n_queens_las_vegas(n):
     
     return queens
 
-def print_board(queens):
-    """
-    Print the board representation of the queens
-    
-    Args:
-    queens (list): Column positions of queens
-    """
-    if queens is None:
-        print("No solution found")
-        return
-    
-    n = len(queens)
-    for row in range(n):
-        line = ['.' * queens[row] + 'Q' + '.' * (n - queens[row] - 1)]
-        print(line[0])
-
 def solve_n_queens_vegas(n):
     # Number of queens (chessboard size)
     #n = 8
@@ -137,26 +120,12 @@ def solve_n_queens_vegas(n):
     for attempt in range(max_attempts):
         solution = n_queens_las_vegas(n)
         if solution is not None:
-            print(f"Solution found on attempt {attempt + 1}:")
+            #print(f"Solution found on attempt {attempt + 1}:")
             board = [[0 for _ in range(n)] for _ in range(n)]
             for i in range(n):
                 board[i][solution[i]] = 1
-            print_board(solution)
-            print("Queen column positions:", solution)
             return board
-    
     print("No solution found after", max_attempts, "attempts")
 
 if __name__ == "__main__":
     solve_n_queens_vegas(8)
-
-# # Ejemplo de uso
-# if __name__ == "__main__":
-#     n = 15  # Cambia el valor de n según sea necesario
-#     solution = solve_n_queens(n)
-#     if solution:
-#         print(f"Solución para el tablero de {n}x{n}:\n")
-#         for row in solution:
-#             print(" ".join("Q" if cell == 1 else "." for cell in row))
-#     else:
-#         print(f"No se encontró solución para el tablero de {n}x{n}.")
