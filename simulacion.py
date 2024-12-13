@@ -1,131 +1,89 @@
+import simpy
 import random
+import time
+from logic import solve_n_queens_determinist, solve_n_queens_vegas
 
-def is_safe(board, row, col, n):
-    """Verifica si es seguro colocar una reina en la posición dada."""
-    # Verificar esta columna hacia arriba
-    for i in range(row):
-        if board[i][col] == 1:
-            return False
 
-    # Verificar diagonal superior izquierda
-    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
-        if board[i][j] == 1:
-            return False
+# Constants
+GAME_DURATION = 8 * 60 * 60  # 8 hours in seconds
+ARRIVAL_TIME_MIN = 10  # Minimum inter-arrival time (seconds)
+ARRIVAL_TIME_MAX = 30  # Maximum inter-arrival time (seconds)
+BOARD_SIZES = [4, 5, 6, 8, 10, 12, 15]  # Possible board sizes
 
-    # Verificar diagonal superior derecha
-    for i, j in zip(range(row, -1, -1), range(col, n)):
-        if board[i][j] == 1:
-            return False
+# Statistics
+total_games = 0
+total_gain = 0
 
-    return True
+def robot_arrival(env, game_queue):
+    """Generate robots arriving at random intervals."""
+    while True:
+        # Wait for the next robot to arrive
+        yield env.timeout(random.uniform(ARRIVAL_TIME_MIN, ARRIVAL_TIME_MAX))
+        # Add a robot to the game queue
+        env.process(play_game(env, game_queue))
 
-def solve_n_queens_util(board, row, n):
-    """Intenta resolver el problema de las n reinas recursivamente."""
-    if row >= n:
-        return True
+def play_game(env, game_queue):
+    """Simulate a single game between a robot and the professor."""
+    global total_games, total_gain
 
-    for col in range(n):
-        if is_safe(board, row, col, n):
-            # Colocar reina
-            board[row][col] = 1
+    # Choose a random board size
+    board_size = random.choice(BOARD_SIZES)
 
-            # Llamada recursiva para la siguiente fila
-            if solve_n_queens_util(board, row + 1, n):
-                return True
+    # Record the start time of the game
+    start_time = env.now
 
-            # Retroceder
-            board[row][col] = 0
+    # Both players attempt to solve the N-Queens problem
+    robot_solution = env.process(solve_n_queens_vegas_simpy(env, board_size))
+    professor_solution = env.process(solve_n_queens_determinist_simpy(env, board_size))
 
-    return False
+    # Wait for the first to finish
+    winner = yield simpy.AnyOf(env, [robot_solution, professor_solution])
 
-def solve_n_queens_determinist(n):
-    """Resuelve el problema de las n reinas usando Backtracking."""
-    board = [[0 for _ in range(n)] for _ in range(n)]
+    # Determine the result
+    game_time = env.now - start_time
+    total_games += 1
 
-    if solve_n_queens_util(board, 0, n):
-        return board
+    if professor_solution in winner:
+        # Professor wins
+        total_gain += 15
+        print(f"Game {total_games}: Professor wins on board size {board_size} in {game_time:.2f} seconds.")
     else:
-        return None
-    
-def is_safe_vegas(queens, row, col):
-    """
-    Check if a queen can be placed on board[row][col]
-    
-    Args:
-    queens (list): Current queens' column positions
-    row (int): Current row being checked
-    col (int): Column to place the queen
-    
-    Returns:
-    bool: True if the queen can be placed safely, False otherwise
-    """
-    # Check columns and diagonals in previous rows
-    for prev_row in range(row):
-        # Check same column
-        if queens[prev_row] == col:
-            return False
-        
-        # Check 45-degree diagonal (top-right to bottom-left)
-        if queens[prev_row] == col - (row - prev_row):
-            return False
-        
-        # Check 135-degree diagonal (top-left to bottom-right)
-        if queens[prev_row] == col + (row - prev_row):
-            return False
-    
-    return True
+        # Robot wins
+        total_gain -= 10
+        print(f"Game {total_games}: Robot wins on board size {board_size} in {game_time:.2f} seconds.")
 
-def n_queens_las_vegas(n):
-    """
-    Solve N-Queens problem using Las Vegas algorithm
-    
-    Args:
-    n (int): Number of queens to place
-    
-    Returns:
-    list: Column positions of queens if a solution is found, 
-          None otherwise
-    """
-    # Initialize queens list with n positions
-    queens = [None] * n
-    
-    # Try to place queens in each row
-    for row in range(n):
-        # Generate a list of possible columns for this row
-        possible_cols = list(range(n))
-        random.shuffle(possible_cols)
-        
-        # Try each column randomly
-        found_safe_col = False
-        for col in possible_cols:
-            if is_safe_vegas(queens, row, col):
-                queens[row] = col
-                found_safe_col = True
-                break
-        
-        # If no safe column found, we've failed
-        if not found_safe_col:
-            return None
-    
-    return queens
+def solve_n_queens_vegas_simpy(env, board_size):
+    """SimPy process for the robot solving N-Queens using the Las Vegas algorithm."""
+    start_time = time.time()
+    solve_n_queens_vegas(board_size)
+    yield env.timeout(time.time() - start_time)  # Simulated execution time
+    return solve_n_queens_vegas(board_size)
 
-def solve_n_queens_vegas(n):
-    # Number of queens (chessboard size)
-    #n = 8
+def solve_n_queens_determinist_simpy(env, board_size):
+    """SimPy process for the professor solving N-Queens using the deterministic algorithm."""
+    start_time = time.time()
+    solve_n_queens_determinist(board_size)
+    yield env.timeout(time.time() - start_time)  # Simulated execution time
+    return solve_n_queens_determinist(board_size)
+
+# Main simulation function
+def main():
+    global total_gain
+
+    # Create the SimPy environment
+    env = simpy.Environment()
+
+    # Start the robot arrival process
+    env.process(robot_arrival(env, None))
+
+    # Run the simulation
+    env.run(until=GAME_DURATION)
+
+    # Output statistics
+    print(f"\nSimulation finished after {GAME_DURATION / 3600} hours.")
+    print(f"Total games played: {total_games}")
+    print(f"Total gain: {total_gain}")
     
-    # Number of attempts to find a solution
-    max_attempts = 100
-    
-    # Try to find a solution
-    for attempt in range(max_attempts):
-        solution = n_queens_las_vegas(n)
-        if solution is not None:
-            #print(f"Solution found on attempt {attempt + 1}:")
-            board = [[0 for _ in range(n)] for _ in range(n)]
-            for i in range(n):
-                board[i][solution[i]] = 1
-            return board
-    print("No solution found after", max_attempts, "attempts")
 
 if __name__ == "__main__":
-    solve_n_queens_vegas(8)
+    main()

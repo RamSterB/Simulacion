@@ -1,7 +1,7 @@
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-from simulacion import solve_n_queens_determinist, solve_n_queens_vegas
+from logic import solve_n_queens_determinist, solve_n_queens_vegas
 
 def measure_algorithm_performance():
     """
@@ -21,10 +21,9 @@ def measure_algorithm_performance():
     for n in board_sizes:
         # Deterministic algorithm performance
         det_run_times = []
-        for _ in range(num_runs):
-            start_time = time.time()
-            solve_n_queens_determinist(n)
-            det_run_times.append(time.time() - start_time)
+        start_time = time.time()
+        solve_n_queens_determinist(n)
+        det_run_times.append(time.time() - start_time)
         determinist_times.append(np.mean(det_run_times))
         
         # Las Vegas algorithm performance
@@ -42,16 +41,19 @@ def measure_algorithm_performance():
     bar_width = 0.35
     index = np.arange(len(board_sizes))
     
+    
+
     # Create bar plots
     plt.bar(index - bar_width/2, determinist_times, bar_width, 
-            label='Deterministic Algorithm', color='blue', alpha=0.7)
+            label='Deterministic Algorithm (Normalized)', color='blue', alpha=0.7)
     plt.bar(index + bar_width/2, vegas_times, bar_width, 
-            label='Las Vegas Algorithm', color='green', alpha=0.7)
+            label='Las Vegas Algorithm (Normalized)', color='green', alpha=0.7)
     
     # Customizing the plot
     plt.xlabel('Board Size (n)', fontsize=12)
-    plt.ylabel('Average Execution Time (seconds)', fontsize=12)
-    plt.title('N-Queens Algorithms: Time Complexity Comparison', fontsize=14)
+    plt.ylabel('Normalized Execution Time', fontsize=12)
+    plt.yscale('log')
+    plt.title('N-Queens Algorithms: Time Complexity Comparison (Normalized)', fontsize=14)
     
     # Set x-ticks to board sizes
     plt.xticks(index, board_sizes)

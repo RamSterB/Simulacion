@@ -1,7 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 
-from simulacion import solve_n_queens_determinist, solve_n_queens_vegas
+from logic import solve_n_queens_determinist, solve_n_queens_vegas
 
 def display_solution(board, algorithm):
     """Muestra la solución del tablero de n reinas en una ventana gráfica."""
@@ -79,6 +79,7 @@ def select_n_and_solve(algorithm):
     # Etiqueta para mostrar resultados
     result_label = tk.Label(root, text="")
     result_label.pack(pady=10)
+    root.after(1,root.quit)
 
     root.mainloop()
     
