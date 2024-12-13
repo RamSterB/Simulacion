@@ -111,7 +111,7 @@ def n_queens_las_vegas(n):
 
 def solve_n_queens_vegas(n):
     # Number of attempts to find a solution
-    max_attempts = 100
+    max_attempts = 300
     
     # Try to find a solution
     for attempt in range(max_attempts):
