@@ -110,15 +110,14 @@ def n_queens_las_vegas(n):
     return queens
 
 def solve_n_queens_vegas(n):
-    
     # Number of attempts to find a solution
     max_attempts = 100
     
     # Try to find a solution
-    for _ in range(max_attempts):
+    for attempt in range(max_attempts):
         solution = n_queens_las_vegas(n)
         if solution is not None:
-            #print(f"Solution found on attempt {attempt + 1}:")
+            #print(f"Solution found on attempt {attempt + 1}")
             board = [[0 for _ in range(n)] for _ in range(n)]
             for i in range(n):
                 board[i][solution[i]] = 1

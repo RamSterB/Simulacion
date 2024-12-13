@@ -67,14 +67,14 @@ def measure_algorithm_performance():
     # Tight layout to prevent cutting off labels
     plt.tight_layout()
     
-    # Save the plot
-    plt.show()
-    
     # Print detailed results
     print("Board Size | Deterministic Time | Las Vegas Time")
     print("-" * 50)
     for n, det_time, vegas_time in zip(board_sizes, determinist_times, vegas_times):
-        print(f"{n:10d} | {det_time:17.5f} | {vegas_time:14.5f}")
+        print(f"{n:10d} | {det_time} | {vegas_time}")
+
+    # Save the plot
+    plt.show()
     
 if __name__ == "__main__":
     measure_algorithm_performance()
