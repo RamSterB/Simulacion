@@ -8,7 +8,7 @@ from logic import solve_n_queens_determinist, solve_n_queens_vegas
 GAME_DURATION = 8 * 60 * 60  # 8 hours in seconds
 ARRIVAL_TIME_MIN = 10  # Minimum inter-arrival time (seconds)
 ARRIVAL_TIME_MAX = 30  # Maximum inter-arrival time (seconds)
-BOARD_SIZES = [4, 5, 6, 8, 10, 12, 15]  # Possible board sizes
+BOARD_SIZES = [4,5,6,8]  # Possible board sizes
 
 # Statistics
 total_games = 0

@@ -6,9 +6,9 @@ from logic import solve_n_queens_determinist, solve_n_queens_vegas
 
 # Constants
 GAME_DURATION = 8 * 60 * 60  # 8 hours in seconds
-ARRIVAL_TIME_MIN = 10  # Minimum inter-arrival time (seconds)
+ARRIVAL_TIME_MIN = 25  # Minimum inter-arrival time (seconds)
 ARRIVAL_TIME_MAX = 30  # Maximum inter-arrival time (seconds)
-BOARD_SIZES = [4, 5, 6, 8, 10, 12, 15]  # Possible board sizes
+BOARD_SIZES = [ 10, 12]  # Possible board sizes
 
 # Statistics
 total_games = 0
@@ -56,7 +56,7 @@ def solve_n_queens_vegas_simpy(env, board_size):
     """SimPy process for the robot solving N-Queens using the Las Vegas algorithm."""
     start_time = time.time()
     solve_n_queens_vegas(board_size)
-    yield env.timeout(time.time() - start_time)  # Simulated execution time
+    yield env.timeout(time.time() - start_time + 0.001)  # Simulated execution time
     return solve_n_queens_vegas(board_size)
 
 def solve_n_queens_determinist_simpy(env, board_size):
